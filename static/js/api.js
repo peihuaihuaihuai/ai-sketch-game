@@ -12,8 +12,10 @@
     // Configuration
     // -----------------------------------------------------------------------
 
-    // Base URL for the Flask backend API
-    const API_BASE = 'http://localhost:5000';
+    // Base URL for the Flask backend API.
+    // Uses relative URL — works both locally (via Flask dev server or proxy)
+    // and in production (HF Spaces, where frontend and backend share the same origin).
+    const API_BASE = '';
 
     // Maximum number of retry attempts on failure
     const MAX_RETRIES = 3;
@@ -150,7 +152,7 @@
                     retryCount++;
                 } else {
                     showBackendError(
-                        '后端连接失败，请确保服务器在 localhost:5000 运行'
+                        '后端连接失败，请刷新页面重试'
                     );
                     return null;
                 }
