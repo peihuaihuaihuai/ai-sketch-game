@@ -1,3 +1,13 @@
+---
+title: AI Sketch Guesser
+emoji: 🎨
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # 🎨 AI 速写猜谜 (AI Sketch Guesser)
 
 基于 CNN 的手绘草图识别 Web 应用。用户在画布上作画，AI 实时识别所画物体类别。
