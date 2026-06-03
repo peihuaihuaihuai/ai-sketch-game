@@ -13,7 +13,7 @@ __pycache__/
 # PyTorch model weights (large binaries)
 *.pth
 *.pt
-# Exception: trained model required for Render deployment
+# Exception: trained model required for deployment
 !model/quickdraw_cnn.pth
 
 # Raw/downloaded data

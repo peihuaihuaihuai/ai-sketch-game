@@ -13,7 +13,7 @@ pillow==10.0.0
 # HTTP client (for data downloading)
 requests==2.31.0
 
-# Production WSGI server (Render deployment)
+# Production WSGI server
 gunicorn==21.2.0
 
 # Testing framework

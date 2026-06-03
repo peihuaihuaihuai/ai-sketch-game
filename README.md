@@ -6,6 +6,56 @@
 
 ---
 
+## 🚀 在线体验
+
+👉 **[在 Hugging Face Spaces 上体验](https://huggingface.co/spaces/YOUR_USERNAME/ai-sketch-game)**
+
+> 替换 `YOUR_USERNAME` 为你的 Hugging Face 用户名
+
+---
+
+## ☁️ 部署到 Hugging Face Spaces (Docker)
+
+本项目使用 Docker SDK 部署，零代码改动，完整保留前端画板体验。
+
+### 1. 克隆项目
+
+```bash
+git clone https://github.com/YOUR_USERNAME/ai-sketch-game.git
+cd ai-sketch-game
+```
+
+### 2. 创建 HF Space
+
+```bash
+# 安装 huggingface_hub
+pip install huggingface_hub
+
+# 登录
+huggingface-cli login
+
+# 创建 Docker Space
+huggingface-cli repo create ai-sketch-game --type space --space-sdk docker
+```
+
+### 3. 推送代码
+
+```bash
+git remote add space https://huggingface.co/spaces/YOUR_USERNAME/ai-sketch-game
+git push space main
+```
+
+推送后 HF Spaces 会自动构建 Docker 镜像并启动服务（首次构建约 3-5 分钟）。
+
+### 手动部署
+
+也可以直接在 [huggingface.co/new-space](https://huggingface.co/new-space) 创建 Space：
+- **Space SDK**: 选择 **Docker**
+- **Space Name**: `ai-sketch-game`
+- 然后将代码推送到 Space 的 Git 仓库
+
+---
+
 ## 项目结构
 
 ```

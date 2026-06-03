@@ -197,7 +197,8 @@ def health():
 # ---------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    # Render sets $PORT dynamically; default to 5000 for local development
+    # Hugging Face Spaces / cloud platforms set $PORT dynamically;
+    # default to 5000 for local development
     port = int(os.environ.get('PORT', 5000))
     logger.info("Starting Flask server on http://0.0.0.0:%d", port)
     app.run(host='0.0.0.0', port=port, threaded=False)
