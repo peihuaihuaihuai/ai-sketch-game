@@ -1,0 +1,20 @@
+# Core web framework
+flask==3.0.0
+flask-cors==4.0.0
+
+# Deep learning framework
+torch==2.1.0
+torchvision==0.16.0
+
+# Scientific computing and image processing
+numpy==1.24.3
+pillow==10.0.0
+
+# HTTP client (for data downloading)
+requests==2.31.0
+
+# Production WSGI server
+gunicorn==21.2.0
+
+# Testing framework
+pytest==7.4.0

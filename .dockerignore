@@ -1,0 +1,36 @@
+# ── Virtual environments (huge, not needed at runtime) ──
+.venv/
+venv/
+env/
+
+# ── Git & CI ──
+.git/
+.gitignore
+.pytest_cache/
+.pytest_cache/
+
+# ── Raw training data (~66MB, not needed for inference) ──
+data/raw/
+
+# ── Cache & temporary files ──
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ── Tool configs ──
+.omc/
+.claude/
+.vscode/
+.idea/
+
+# ── OS files ──
+.DS_Store
+Thumbs.db
+
+# ── Development files ──
+tests/
+result/
+ai_chat_log.md
+Dockerfile
+.dockerignore
