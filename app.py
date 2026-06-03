@@ -5,6 +5,7 @@ This application serves the trained PyTorch model via a REST API and
 hosts the static frontend files.
 """
 
+import os
 import sys
 import logging
 
@@ -196,6 +197,7 @@ def health():
 # ---------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    logger.info("Starting Flask server on http://localhost:5000")
-    # threaded=False ensures predictable single-request latency for local use
-    app.run(host='0.0.0.0', port=5000, threaded=False)
+    # Render sets $PORT dynamically; default to 5000 for local development
+    port = int(os.environ.get('PORT', 5000))
+    logger.info("Starting Flask server on http://0.0.0.0:%d", port)
+    app.run(host='0.0.0.0', port=port, threaded=False)

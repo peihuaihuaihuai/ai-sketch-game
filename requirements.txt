@@ -13,5 +13,8 @@ pillow==10.0.0
 # HTTP client (for data downloading)
 requests==2.31.0
 
+# Production WSGI server (Render deployment)
+gunicorn==21.2.0
+
 # Testing framework
 pytest==7.4.0
