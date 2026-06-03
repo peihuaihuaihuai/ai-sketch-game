@@ -18,9 +18,7 @@ pinned: false
 
 ## 🚀 在线体验
 
-👉 **[在 Hugging Face Spaces 上体验](https://huggingface.co/spaces/YOUR_USERNAME/ai-sketch-game)**
-
-> 替换 `YOUR_USERNAME` 为你的 Hugging Face 用户名
+👉 **[在 Hugging Face Spaces 上体验](https://huggingface.co/spaces/peihuaihuaihuai/ai-sketch-game)**
 
 ---
 
