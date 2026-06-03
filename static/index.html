@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNN Sketch Guesser</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Main application container -->
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>🎨 CNN Sketch Guesser</h1>
+            <p class="subtitle">Draw a sketch and the AI will guess what it is!</p>
+        </header>
+
+        <!-- Main content area: drawing + results side by side -->
+        <main class="main-content">
+            <!-- Left column: drawing canvas -->
+            <section class="drawing-section">
+                <div class="canvas-container">
+                    <canvas id="drawing-canvas" width="400" height="400"></canvas>
+                    <!-- Offscreen canvas for preprocessing (hidden) -->
+                    <canvas id="preprocess-canvas" width="28" height="28" style="display:none;"></canvas>
+                </div>
+
+                <!-- Drawing tools -->
+                <div class="tools-bar">
+                    <button id="btn-pen" class="tool-btn active" title="Pen">
+                        ✏️ Pen
+                    </button>
+                    <button id="btn-eraser" class="tool-btn" title="Eraser">
+                        🧼 Eraser
+                    </button>
+                    <button id="btn-clear" class="tool-btn" title="Clear canvas">
+                        🗑️ Clear
+                    </button>
+                    <button id="btn-predict" class="tool-btn predict-btn" title="Predict now">
+                        🔮 Predict Now
+                    </button>
+                    <button id="btn-reset" class="tool-btn" title="Reset API state">
+                        🔄 Reset
+                    </button>
+                </div>
+
+                <!-- Debounce control -->
+                <div class="debounce-control">
+                    <label for="debounce-slider">
+                        Auto-predict delay: <span id="debounce-value">800</span>ms
+                    </label>
+                    <input
+                        type="range"
+                        id="debounce-slider"
+                        min="300"
+                        max="2000"
+                        value="800"
+                        step="100"
+                    >
+                </div>
+
+                <!-- "Model sees" debug view -->
+                <div class="debug-view">
+                    <h3>Model sees (96×96)</h3>
+                    <canvas id="debug-canvas" width="96" height="96"></canvas>
+                </div>
+            </section>
+
+            <!-- Right column: results -->
+            <section class="results-section">
+                <!-- Prediction results -->
+                <div class="predictions-panel">
+                    <h2>🔮 Predictions</h2>
+                    <div id="predictions-loading" class="predictions-loading hidden">
+                        <span class="spinner"></span> Thinking...
+                    </div>
+                    <div id="predictions-list" class="predictions-list">
+                        <p class="placeholder-text">Draw something to see predictions!</p>
+                    </div>
+                    <div id="predictions-meta" class="predictions-meta hidden"></div>
+                </div>
+
+                <!-- Confidence trend chart -->
+                <div class="trend-panel">
+                    <h2>📈 Confidence Trend</h2>
+                    <div id="trend-chart" class="trend-chart">
+                        <p class="placeholder-text">Confidence trend will appear here.</p>
+                    </div>
+                </div>
+
+                <!-- Backend status -->
+                <div id="backend-status" class="backend-status hidden">
+                    ⚠️ Backend unavailable. Retrying...
+                </div>
+            </section>
+        </main>
+
+        <!-- History section (below main content) -->
+        <section class="history-section">
+            <h2>🕐 Drawing History</h2>
+            <div class="history-controls">
+                <button id="btn-clear-history" class="tool-btn danger">
+                    Clear History
+                </button>
+            </div>
+            <div id="history-gallery" class="history-gallery">
+                <p class="placeholder-text">Your drawings will appear here.</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- JavaScript modules -->
+    <script src="js/canvas.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/visualization.js"></script>
+    <script src="js/history.js"></script>
+</body>
+</html>

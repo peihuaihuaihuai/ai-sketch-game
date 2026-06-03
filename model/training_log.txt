@@ -1,0 +1,90 @@
+============================================================
+QuickDraw AI Training - Phase 2
+============================================================
+Model: resnet
+Classes: airplane, car, cat, dog, house, tree
+Device: cuda
+
+Data source: QuickDraw (real)
+Total samples: 120,000
+Train samples: 96,000
+Val samples:   24,000
+Batch size:    64
+
+Model: resnet
+Parameters: 307,558
+Size: ~1.17 MB
+
+======================================================================
+Epoch  Train Loss   Train Acc    Val Loss     Val Acc      LR           Time    
+======================================================================
+1      1.0129       0.6780       0.3739       0.8725       0.001000     86.4    s
+  -> New best model saved (val_acc=0.8725)
+2      0.4481       0.8456       0.2836       0.8996       0.000976     73.7    s
+  -> New best model saved (val_acc=0.8996)
+3      0.3564       0.8772       0.2388       0.9114       0.000905     75.4    s
+  -> New best model saved (val_acc=0.9114)
+4      0.3113       0.8925       0.1981       0.9287       0.000794     72.0    s
+  -> New best model saved (val_acc=0.9287)
+5      0.2804       0.9026       0.1949       0.9294       0.000655     71.4    s
+  -> New best model saved (val_acc=0.9294)
+6      0.2595       0.9092       0.1713       0.9377       0.000501     70.2    s
+  -> New best model saved (val_acc=0.9377)
+7      0.2421       0.9157       0.1677       0.9394       0.000346     73.2    s
+  -> New best model saved (val_acc=0.9394)
+8      0.2303       0.9193       0.1577       0.9419       0.000207     70.6    s
+  -> New best model saved (val_acc=0.9419)
+9      0.2188       0.9233       0.1561       0.9425       0.000096     70.2    s
+  -> New best model saved (val_acc=0.9425)
+10     0.2155       0.9241       0.1546       0.9433       0.000025     71.2    s
+  -> New best model saved (val_acc=0.9433)
+11     0.2601       0.9091       0.1720       0.9362       0.001000     71.2    s
+12     0.2481       0.9137       0.1659       0.9395       0.000994     70.9    s
+13     0.2374       0.9169       0.1683       0.9387       0.000976     71.3    s
+14     0.2318       0.9189       0.1651       0.9397       0.000946     71.0    s
+15     0.2244       0.9202       0.1570       0.9421       0.000905     52.0    s
+
+Early stopping triggered (no improvement for 5 epochs)
+======================================================================
+
+Training complete in 1071.1s!
+Best validation accuracy: 0.9433 (epoch 10)
+Model saved to: D:\ai-sketch-game\model\quickdraw_cnn.pth
+
+======================================================================
+Training Summary
+======================================================================
+Data source:        Unknown
+Classes:            airplane, car, cat, dog, house, tree
+Total samples:      120,000
+Train/Val split:    80/20
+Model architecture: resnet
+Parameters:         307,558
+Epochs trained:     15
+Batch size:         64
+Initial LR:         0.001
+Weight decay:       0.0001
+Device:             cuda
+Mixed precision:    True
+
+Best validation accuracy: 0.9433 (epoch 10)
+Final model path: D:\ai-sketch-game\model\quickdraw_cnn.pth
+
+Per-epoch history:
+----------------------------------------------------------------------
+Epoch  Train Loss   Train Acc    Val Loss     Val Acc      LR          
+1      1.0129       0.6780       0.3739       0.8725       0.001000    
+2      0.4481       0.8456       0.2836       0.8996       0.000976    
+3      0.3564       0.8772       0.2388       0.9114       0.000905    
+4      0.3113       0.8925       0.1981       0.9287       0.000794    
+5      0.2804       0.9026       0.1949       0.9294       0.000655    
+6      0.2595       0.9092       0.1713       0.9377       0.000501    
+7      0.2421       0.9157       0.1677       0.9394       0.000346    
+8      0.2303       0.9193       0.1577       0.9419       0.000207    
+9      0.2188       0.9233       0.1561       0.9425       0.000096    
+10     0.2155       0.9241       0.1546       0.9433       0.000025    
+11     0.2601       0.9091       0.1720       0.9362       0.001000    
+12     0.2481       0.9137       0.1659       0.9395       0.000994    
+13     0.2374       0.9169       0.1683       0.9387       0.000976    
+14     0.2318       0.9189       0.1651       0.9397       0.000946    
+15     0.2244       0.9202       0.1570       0.9421       0.000905    

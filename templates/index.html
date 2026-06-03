@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 速写猜谜</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>🎨 AI 速写猜谜</h1>
+            <p class="subtitle">画出物体，让AI来猜！</p>
+        </header>
+
+        <!-- Instructions -->
+        <div class="instructions">
+            <p>👉 请在下方画出以下6种物体之一，让AI猜测</p>
+            <div class="class-list">
+                <span class="class-tag">✈️ 飞机 airplane</span>
+                <span class="class-tag">🚗 汽车 car</span>
+                <span class="class-tag">🐱 猫 cat</span>
+                <span class="class-tag">🐶 狗 dog</span>
+                <span class="class-tag">🏠 房子 house</span>
+                <span class="class-tag">🌲 树 tree</span>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <main class="main-content">
+            <!-- Left: drawing canvas -->
+            <section class="drawing-section">
+                <div class="canvas-container">
+                    <canvas id="drawing-canvas" width="400" height="400"></canvas>
+                    <canvas id="preprocess-canvas" width="28" height="28" style="display:none;"></canvas>
+                </div>
+
+                <!-- Tools -->
+                <div class="tools-bar">
+                    <button id="btn-pen" class="tool-btn active" title="画笔">
+                        ✏️ 画笔
+                    </button>
+                    <button id="btn-eraser" class="tool-btn" title="橡皮擦">
+                        🧼 橡皮擦
+                    </button>
+                    <button id="btn-clear" class="tool-btn" title="清空画布">
+                        🗑️ 清空
+                    </button>
+                    <button id="btn-predict" class="tool-btn predict-btn" title="立即预测">
+                        🔮 预测
+                    </button>
+                </div>
+
+                <!-- Debug view -->
+                <div class="debug-view">
+                    <h3>模型看到的图像 (96×96)</h3>
+                    <canvas id="debug-canvas" width="96" height="96"></canvas>
+                </div>
+            </section>
+
+            <!-- Right: predictions -->
+            <section class="results-section">
+                <div class="predictions-panel">
+                    <h2>🔮 预测结果</h2>
+                    <div id="predictions-loading" class="predictions-loading hidden">
+                        <span class="spinner"></span> 正在思考...
+                    </div>
+                    <div id="predictions-list" class="predictions-list">
+                        <p class="placeholder-text">画点什么来查看预测结果！</p>
+                    </div>
+                    <div id="predictions-meta" class="predictions-meta hidden"></div>
+                </div>
+
+                <div class="trend-panel">
+                    <h2>📈 置信度趋势</h2>
+                    <div id="trend-chart" class="trend-chart">
+                        <p class="placeholder-text">进行多次预测后，置信度趋势将显示在这里。</p>
+                    </div>
+                </div>
+
+                <div id="backend-status" class="backend-status hidden">
+                    ⚠️ 后端连接失败，请检查服务器是否运行
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/canvas.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/visualization.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/history.js') }}"></script>
+</body>
+</html>
