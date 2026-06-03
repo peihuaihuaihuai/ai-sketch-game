@@ -14,17 +14,15 @@ ai-sketch-game/
 ├── requirements.txt            # Python 依赖
 ├── api/
 │   ├── __init__.py
-│   └── predict.py              # 推理 API 逻辑（模型加载、预测路由）
+│   └── predict.py              # 推理 API（模型加载、预处理、预测）
 ├── model/
 │   ├── __init__.py
-│   ├── model.py                # CNN 模型定义（QuickDrawResNet）
+│   ├── model.py                # CNN 模型定义 (QuickDrawResNet)
 │   ├── preprocessing.py        # 图像预处理（归一化、张量转换）
 │   ├── dataset.py              # QuickDraw 数据集加载器
-│   ├── stroke_graph.py         # 笔画图构建 & GNN/Hybrid 模型
 │   ├── train.py                # CNN 训练脚本
-│   ├── train_gnn.py            # GNN 训练脚本
 │   ├── diagnostics.py          # 模型诊断脚本
-│   ├── quickdraw_cnn.pth       # 训练好的 CNN 模型权重
+│   ├── quickdraw_cnn.pth       # 训练好的 CNN 模型权重 (~3.6 MB)
 │   └── training_log.txt        # 训练日志
 ├── data/
 │   └── raw/                    # QuickDraw 原始 .npy 数据
@@ -41,9 +39,7 @@ ai-sketch-game/
 │   └── index.html              # Flask 模板（中文版）
 └── tests/
     ├── test_model.py           # 模型单元测试
-    ├── test_api.py             # API 单元测试
-    ├── test_stroke_graph.py    # 笔画图构建测试
-    └── test_class_separation.py# 类别分离度测试
+    └── test_api.py             # API 单元测试
 ```
 
 ---
@@ -73,7 +69,7 @@ python app.py
 
 1. 在画布上绘制 6 种类别之一的草图
 2. 停止绘画后自动触发预测（可调节延迟），或点击 **🔮 预测** 按钮
-3. 右侧面板显示 Top-5 预测结果和置信度趋势
+3. 右侧面板显示 Top-3 预测结果和置信度趋势
 
 ---
 
@@ -81,23 +77,26 @@ python app.py
 
 ### 模型
 
-| 模型 | 架构 | 参数量 | 验证精度 |
-|------|------|--------|---------|
-| **CNN** (当前使用) | QuickDrawResNet | 308,911 | **94.33%** |
-| GNN | StrokeGNN (纯 PyTorch 消息传递) | ~59K | 未训练 |
-| Hybrid | CNN + GNN 联合推理 | ~408K | 未微调 |
+| 项目 | 说明 |
+|------|------|
+| 架构 | QuickDrawResNet (轻量级残差网络) |
+| 参数量 | 308,911 |
+| 输入 | 28x28 灰度位图（白笔画/黑背景） |
+| 输出 | 6 类 logits |
+| 验证精度 | **94.33%** (epoch 10) |
+| 推理延迟 | ~2-5 ms (CPU) |
 
-CNN 模型基于 ResNet 残差结构，输入为 28×28 灰度位图（白笔画/黑背景），输出 6 类 logits。
+CNN 基于 ResNet 残差结构，使用 AdaptiveAvgPool2d 全局池化，对输入尺寸无严格限制。
 
 ### 前端预处理管线
 
 ```
-用户画布 (400×400, 8px 笔宽, 白底黑字)
-  → 质心 (center-of-mass) 定位
-  → 方形裁剪 + 15% 边距
-  → 双线性缩放至 28×28
-  → 自适应阈值二值化（目标密度 25%）
-  → 784 浮点数组 [0, 1]（白笔画/黑背景）
+用户画布 (400x400, 8px 笔宽, 白底黑字)
+  -> 质心 (center-of-mass) 定位
+  -> 方形裁剪 + 15% 边距
+  -> 双线性缩放至 28x28
+  -> 自适应阈值二值化（目标密度 25%）
+  -> 784 浮点数组 [0, 1]（白笔画/黑背景，QuickDraw 标准格式）
 ```
 
 ### API 接口
@@ -117,8 +116,7 @@ CNN 模型基于 ResNet 残差结构，输入为 28×28 灰度位图（白笔画
 {
     "top5": [
         {"label": "airplane", "probability": 0.9234},
-        {"label": "car",     "probability": 0.0512},
-        ...
+        {"label": "car",     "probability": 0.0512}
     ],
     "latency_ms": 2.145,
     "model": "resnet"
@@ -137,37 +135,30 @@ CNN 模型基于 ResNet 残差结构，输入为 28×28 灰度位图（白笔画
 ## 运行测试
 
 ```bash
-# 运行全部测试（92 个用例）
+# 运行全部测试
 python -m pytest tests/ -v
 
 # 运行单个模块
 python -m pytest tests/test_model.py -v
 python -m pytest tests/test_api.py -v
-python -m pytest tests/test_stroke_graph.py -v
-python -m pytest tests/test_class_separation.py -v
 ```
 
 ---
 
 ## 模型训练
 
-### CNN
-
 ```bash
 python model/train.py
 ```
 
-- 数据集: Google QuickDraw 官方 .npy 文件（120,000 样本）
-- 训练/验证: 80/20 划分
-- 优化器: Adam, 初始学习率 0.001, cosine 退火
-- 早停: 5 epoch 无提升则停止
-- 最佳结果: epoch 10, val_acc = 94.33%
-
-### GNN（未训练）
-
-```bash
-python model/train_gnn.py
-```
+| 参数 | 值 |
+|------|-----|
+| 数据集 | Google QuickDraw 官方 .npy 文件 |
+| 样本数 | 120,000 (每类 20,000) |
+| 训练/验证 | 80/20 划分 |
+| 优化器 | Adam, 初始学习率 0.001, cosine 退火 |
+| 早停 | 5 epoch 无提升 |
+| 最佳结果 | epoch 10, val_acc = 94.33% |
 
 ### 模型诊断
 
@@ -187,6 +178,7 @@ python model/diagnostics.py
 | Pillow | 10.0 | 图像处理 |
 | Pytest | 7.4 | 单元测试 |
 
+---
 
 ## 课程信息
 
