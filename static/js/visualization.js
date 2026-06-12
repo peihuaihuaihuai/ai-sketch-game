@@ -23,6 +23,13 @@
     const trendData = [];
     const MAX_TREND_POINTS = 10;
 
+    // Track excluded labels for re-prediction
+    let excludedLabels = [];
+
+    // Store current pixels & strokes for re-prediction requests
+    let currentPixels = null;
+    let currentStrokes = null;
+
     // Color mapping for each category
     const CATEGORY_COLORS = {
         airplane: '#e94560',
@@ -56,16 +63,30 @@
      * @param {Array} result.top5 - Array of {label, probability} objects
      */
     function renderPredictions(result) {
-        const { top5, latency_ms, model } = result;
+        const { top5, latency_ms, model, excluded } = result;
         const top3 = (top5 || []).slice(0, 3);
-
+    
+        // Update excluded labels from backend response (if this is a repredict)
+        if (excluded && excluded.length > 0) {
+            excludedLabels = excluded;
+        } else if (!excluded) {
+            // Fresh prediction — reset excluded labels
+            excludedLabels = [];
+        }
+    
         if (top3.length === 0) {
             predictionsList.innerHTML = `
                 <p class="placeholder-text">未收到预测结果</p>
             `;
             return;
         }
-
+    
+        // Determine if we can still exclude more labels
+        const remainingLabels = Object.keys(CHINESE_LABELS).filter(
+            label => !excludedLabels.includes(label)
+        );
+        const canExcludeMore = remainingLabels.length > 1 && top3.length > 0;
+    
         // Build HTML for predictions
         const html = top3.map((item, index) => {
             const percentage = (item.probability * 100).toFixed(1);
@@ -74,11 +95,18 @@
             const rank = index + 1;
             const isTop = index === 0;
             const highlightClass = isTop ? 'prediction-item top-prediction' : 'prediction-item';
-
+    
+            // Add "预测错了" button only to the #1 prediction, if there are still labels to exclude
+            const wrongBtn = (isTop && canExcludeMore) ?
+                `<button class="wrong-prediction-btn" data-label="${escapeHtml(item.label)}" title="排除此项，重新预测">
+                    ✖ 预测错了
+                </button>` : '';
+    
             return `
                 <div class="${highlightClass}">
                     <span class="prediction-rank">#${rank}</span>
                     <span class="prediction-label">${escapeHtml(cnLabel)} (${escapeHtml(item.label)})</span>
+                    ${wrongBtn}
                     <div class="prediction-bar-container">
                         <div class="prediction-bar" style="width: 0%; background: ${color};"></div>
                     </div>
@@ -86,9 +114,28 @@
                 </div>
             `;
         }).join('');
-
-        predictionsList.innerHTML = html;
-
+    
+        // Add excluded info line above predictions if any labels were excluded
+        const excludedInfoLine = (excludedLabels.length > 0) ?
+            `<div class="excluded-info-line">
+                <span class="excluded-badge">🚫 已排除: ${excludedLabels.map(l => escapeHtml(CHINESE_LABELS[l] || l)).join(', ')}</span>
+                <button class="reset-exclude-btn" title="恢复全部标签重新预测">↩ 恢复</button>
+            </div>` : '';
+    
+        predictionsList.innerHTML = excludedInfoLine + html;
+    
+        // Attach click handler for "预测错了" button
+        const wrongBtns = predictionsList.querySelectorAll('.wrong-prediction-btn');
+        wrongBtns.forEach(btn => {
+            btn.addEventListener('click', handleWrongPrediction);
+        });
+    
+        // Attach click handler for "恢复" button
+        const resetBtn = predictionsList.querySelector('.reset-exclude-btn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', handleResetExclude);
+        }
+    
         // Animate bars after a short delay to trigger CSS transition
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
@@ -101,13 +148,54 @@
                 });
             });
         });
-
+    
         // Update meta info (latency, model name)
         if (predictionsMeta) {
             const latency = latency_ms !== undefined ? `${latency_ms.toFixed(1)}ms` : '--';
             const modelName = model || 'unknown';
-            predictionsMeta.textContent = `模型: ${modelName} · 推理延迟: ${latency}`;
+            const excludedStr = excludedLabels.length > 0 ? ` · 排除: ${excludedLabels.join(', ')}` : '';
+            predictionsMeta.textContent = `模型: ${modelName} · 推理延迟: ${latency}${excludedStr}`;
             predictionsMeta.classList.remove('hidden');
+        }
+    }
+    
+    /**
+     * Handle click on "预测错了" button — exclude the label and request re-prediction.
+     */
+    function handleWrongPrediction(e) {
+        const label = e.currentTarget.getAttribute('data-label');
+        if (!label || excludedLabels.includes(label)) return;
+    
+        // Add label to excluded list
+        excludedLabels.push(label);
+    
+        // Dispatch re-prediction request
+        if (currentPixels) {
+            window.dispatchEvent(new CustomEvent('requestRepredict', {
+                detail: {
+                    pixels: currentPixels,
+                    strokes: currentStrokes,
+                    excludeLabels: [...excludedLabels],
+                },
+            }));
+        }
+    }
+    
+    /**
+     * Handle click on "恢复" button — reset excluded labels and re-predict normally.
+     */
+    function handleResetExclude() {
+        excludedLabels = [];
+    
+        if (currentPixels) {
+            // Re-predict with no exclusions (same as original prediction)
+            window.dispatchEvent(new CustomEvent('requestRepredict', {
+                detail: {
+                    pixels: currentPixels,
+                    strokes: currentStrokes,
+                    excludeLabels: [],
+                },
+            }));
         }
     }
 
@@ -224,6 +312,14 @@
     // Event Handling
     // -----------------------------------------------------------------------
 
+    // Listen for raw prediction request to capture pixels/strokes for re-prediction
+    window.addEventListener('requestPrediction', (e) => {
+        currentPixels = e.detail.pixels;
+        currentStrokes = e.detail.strokes;
+        // Reset excluded labels on fresh prediction
+        excludedLabels = [];
+    });
+
     window.addEventListener('predictionResult', (e) => {
         const result = e.detail;
         renderPredictions(result);
@@ -237,5 +333,7 @@
     window.visualizationModule = {
         renderPredictions,
         updateTrendChart,
+        getExcludedLabels: () => [...excludedLabels],
+        resetExcludedLabels: () => { excludedLabels = []; },
     };
 })();

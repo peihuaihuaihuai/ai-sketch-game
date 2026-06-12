@@ -142,6 +142,63 @@ def predict_endpoint():
         }), 500
 
 
+@app.route('/repredict', methods=['POST'])
+def repredict_endpoint():
+    """
+    Re-prediction endpoint: accept a sketch and excluded labels,
+    return Top-5 predictions with excluded labels removed and probabilities re-normalized.
+
+    Request Body (JSON):
+        {
+            "pixels": [0.0, 0.12, ..., 0.98],  // 784 floats in [0, 1]
+            "strokes": [...],                     // optional stroke data
+            "exclude_labels": ["cat"]            // labels to exclude
+        }
+
+    Response (200 OK):
+        {
+            "top5": [
+                {"label": "dog", "probability": 0.65},
+                ...
+            ],
+            "latency_ms": 2.145,
+            "model": "resnet",
+            "excluded": ["cat"]
+        }
+    """
+    if not request.is_json:
+        return jsonify({'error': 'Request must be JSON'}), 400
+
+    data = request.get_json(silent=True)
+    if data is None:
+        return jsonify({'error': 'Invalid JSON body'}), 400
+
+    if 'pixels' not in data:
+        return jsonify({'error': "Missing required field: 'pixels'"}), 400
+
+    pixels = data['pixels']
+    strokes = data.get('strokes')
+    exclude_labels = data.get('exclude_labels', [])
+
+    # Validate input
+    try:
+        predict_module.validate_pixels(pixels)
+        if strokes is not None:
+            predict_module.validate_strokes(strokes)
+    except ValueError as e:
+        return jsonify({'error': f'Invalid input: {e}'}), 400
+
+    try:
+        result = predict_module.repredict(pixels, strokes, exclude_labels)
+        return jsonify(result)
+    except Exception as e:
+        logger.exception("Re-prediction failed")
+        return jsonify({
+            'error': 'Re-prediction failed',
+            'detail': str(e),
+        }), 500
+
+
 @app.route('/reset', methods=['POST'])
 def reset_endpoint():
     """

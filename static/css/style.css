@@ -436,6 +436,67 @@ body {
     font-weight: 600;
 }
 
+/* -------------------------------------------------------------------------- */
+/* Wrong Prediction Button                                                    */
+/* -------------------------------------------------------------------------- */
+
+.wrong-prediction-btn {
+    padding: 3px 10px;
+    border: 1px solid var(--claude-error);
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--claude-error);
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    margin-left: 4px;
+}
+
+.wrong-prediction-btn:hover {
+    background: var(--claude-error);
+    color: #FFFFFF;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(199, 91, 91, 0.25);
+}
+
+/* Excluded info line */
+.excluded-info-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(199, 91, 91, 0.08);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-xs);
+    font-size: 0.82rem;
+}
+
+.excluded-badge {
+    color: var(--claude-error);
+    font-weight: 500;
+}
+
+.reset-exclude-btn {
+    padding: 4px 12px;
+    border: 1px solid var(--claude-success);
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--claude-success);
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.reset-exclude-btn:hover {
+    background: var(--claude-success);
+    color: #FFFFFF;
+}
+
 /* Loading */
 .predictions-loading {
     display: flex;

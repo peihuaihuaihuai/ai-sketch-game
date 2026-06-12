@@ -181,6 +181,79 @@ def predict(pixels: list, strokes: list = None) -> dict:
     }
 
 
+def repredict(pixels: list, strokes: list = None, exclude_labels: list = None) -> dict:
+    """Run CNN inference excluding specified labels and return re-normalized Top-K.
+
+    When the user indicates the top prediction is wrong, this function
+    re-runs inference, zeroes out the probabilities for the excluded labels,
+    and re-normalizes the remaining probabilities before ranking.
+
+    Args:
+        pixels: List of 784 float values in [0, 1].
+        strokes: Optional list of stroke sequences.
+        exclude_labels: List of label strings to exclude from results.
+
+    Returns:
+        Dictionary with 'top5', 'latency_ms', 'model', and 'excluded' keys.
+    """
+    validate_pixels(pixels)
+    if strokes is not None:
+        validate_strokes(strokes)
+    if exclude_labels is None:
+        exclude_labels = []
+
+    # Validate exclude_labels
+    for label in exclude_labels:
+        if label not in CLASS_LABELS:
+            raise ValueError(f"Unknown label to exclude: '{label}'")
+
+    tensor = preprocess_for_inference(pixels)
+    tensor = tensor.to(_device)
+
+    model = get_model()
+    infer_start = time.perf_counter()
+    with torch.no_grad():
+        logits = model(tensor)
+    infer_end = time.perf_counter()
+    latency_ms = (infer_end - infer_start) * 1000
+
+    probs = torch.softmax(logits, dim=1).cpu().numpy().flatten()
+
+    # Zero out excluded labels' probabilities
+    exclude_indices = [CLASS_LABELS.index(label) for label in exclude_labels
+                       if label in CLASS_LABELS]
+    for idx in exclude_indices:
+        probs[idx] = 0.0
+
+    # Re-normalize remaining probabilities
+    total = probs.sum()
+    if total > 0:
+        probs = probs / total
+    else:
+        # Edge case: all labels excluded — uniform distribution on remaining
+        probs = np.ones(len(CLASS_LABELS)) / len(CLASS_LABELS)
+        for idx in exclude_indices:
+            probs[idx] = 0.0
+
+    top_indices = np.argsort(probs)[-TOP_K:][::-1]
+
+    # Filter out zero-probability (excluded) entries from top5
+    top5 = []
+    for idx in top_indices:
+        if probs[idx] > 0:
+            top5.append({
+                'label': CLASS_LABELS[idx],
+                'probability': round(float(probs[idx]), 4)
+            })
+
+    return {
+        'top5': top5,
+        'latency_ms': round(latency_ms, 3),
+        'model': _model_name,
+        'excluded': exclude_labels,
+    }
+
+
 def predict_batch(pixel_batches: list, stroke_batches: list = None) -> list:
     """Run batched inference on multiple sketches."""
     from model.preprocessing import batch_preprocess_for_inference
